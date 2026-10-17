@@ -2270,7 +2270,7 @@ func shellQuote(s string) string {
 }
 
 func fsmonitorHookScript(stateRoot, exe, repoName string) string {
-	return fmt.Sprintf("#!/bin/sh\nARTIFACT_FS_ROOT=%s exec %s fsmonitor-hook --name %s \"$@\"\n", shellScriptQuote(stateRoot), shellScriptQuote(exe), shellScriptQuote(repoName))
+	return fmt.Sprintf("#!/bin/sh\n[ -x %s ] || exit 1\nARTIFACT_FS_ROOT=%s exec %s fsmonitor-hook --name %s \"$@\"\n", shellScriptQuote(exe), shellScriptQuote(stateRoot), shellScriptQuote(exe), shellScriptQuote(repoName))
 }
 
 func shellScriptQuote(s string) string {

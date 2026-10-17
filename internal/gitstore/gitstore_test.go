@@ -217,6 +217,27 @@ func TestFSMonitorHookScriptQuotesArgs(t *testing.T) {
 	}
 }
 
+func TestFSMonitorHookScriptFailsSilentlyWhenExeMissing(t *testing.T) {
+	t.Parallel()
+	tmp := t.TempDir()
+	hookPath := filepath.Join(tmp, "artifact-fs-fsmonitor")
+	script := fsmonitorHookScript(tmp, "/nonexistent/binary", "repo")
+	if err := os.WriteFile(hookPath, []byte(script), 0o755); err != nil {
+		t.Fatalf("write hook: %v", err)
+	}
+	cmd := exec.Command("sh", hookPath)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	if err == nil {
+		t.Fatalf("expected non-zero exit code when binary missing")
+	}
+	if stderr.Len() != 0 {
+		t.Fatalf("expected empty stderr from hook when binary missing, got %q", stderr.String())
+	}
+}
+
+
 func TestBlobToCacheBinarySafe(t *testing.T) {
 	t.Parallel()
 	tmp := t.TempDir()
