@@ -38,8 +38,12 @@ func Run(ctx context.Context, args []string, stdout io.Writer, stderr io.Writer)
 			Flags: []ucli.Flag{
 				ucli.StringFlag{Name: "root", Value: filepath.Join(root, "mnt"), Usage: "mount root directory"},
 				ucli.IntFlag{Name: "hydration-concurrency", Value: daemon.DefaultHydrationConcurrency, Usage: "number of concurrent blob hydration workers"},
+				ucli.BoolFlag{Name: "allow-other", Usage: "allow other users (including root) to access mounted repositories (requires user_allow_other in /etc/fuse.conf)"},
 			},
 			Action: func(c *ucli.Context) error {
+				if c.Bool("allow-other") {
+					_ = os.Setenv("ARTIFACT_FS_ALLOW_OTHER", "1")
+				}
 				logger := logging.NewJSONLogger(stderr, slog.LevelInfo)
 				svc, err := daemon.New(ctx, root, logger)
 				if err != nil {
